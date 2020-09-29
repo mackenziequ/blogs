@@ -1,0 +1,288 @@
+```{r setup, include=FALSE}
+#install.packages("devtools")
+#devtools::install_github("sharlagelfand/opendatatoronto")
+knitr::opts_chunk$set(cache = TRUE)
+library(tidyverse)
+library(devtools)
+```
+
+```{r import data, cache = TRUE}
+library(opendatatoronto)
+
+packages <- show_package("c7d34d9b-23d2-44fe-8b3b-cd82c8b38978")
+
+bike_theft_resources <- list_package_resources("c7d34d9b-23d2-44fe-8b3b-cd82c8b38978")
+
+bike_theft_data <- get_resource(bike_theft_resources)
+
+head(bike_theft_data)
+```
+#Graph Occurrence by Year
+```{r}
+occurrence_yr <- ggplot(bike_theft_data, aes(x= Occurrence_Year)) + 
+  geom_bar(fill="#56B4E9", color = "#00AFBB") + 
+  scale_x_continuous(name="Occurrence Year", breaks=c(2014, 2015, 2016, 2017, 2018, 2019)) + 
+  scale_y_continuous(name = "Number Reported", limits = c(0, 5000))+ labs(title = "Bike Theft Occurrence by Year", tag = "(1)") +
+  theme_light()
+
+occurrence_yr
+```
+
+#Graph occurrence by month
+```{r}
+occurrence_month <- ggplot(bike_theft_data, aes(x=Occurrence_Month)) +geom_bar(fill="#56B4E9", color = "#00AFBB") + 
+  scale_x_continuous(name = "Occurrence Month", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12), labels =  c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul","Aug", "Sep", "Oct", "Nov", "Dec")) + 
+  scale_y_continuous(name = "Number Reported", limits = c(0, 5000)) + labs(title = "Bike Theft Occurrence by Month", tag = "(2)") +
+  theme_light()
+occurrence_month
+```
+
+#Graph occurrence by day
+```{r}
+occurrence_day <- ggplot(bike_theft_data, aes(x= Occurrence_Day)) + geom_bar(fill="#56B4E9", color = "#00AFBB") + 
+  scale_x_continuous(name = "Occurrence Day", breaks = c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31)) + 
+  scale_y_continuous(name = "Number Reported", limits = c(0, 1000)) + labs(title = "Bike Theft Occurrence by Day", tag = "(3)") +
+  theme_light()
+occurrence_day
+```
+
+#Change Occurrence_Time to Numeric, and round to each hour(16:45-> 16:00).
+```{r}
+Occurrence_Time_Num <- c()
+for (i in bike_theft_data$Occurrence_Time){
+  occur_hr<- as.numeric(substring(i,1,2))
+
+  Occurrence_Time_Num <- rbind(Occurrence_Time_Num, c(occur_hr))
+}
+```
+
+#Divide Occurrence_Time into morning,afteroon, evening, and night. Then find the number of bike theft reported in each time period. 
+```{r}
+Occurrence_Morning_Time<-c()
+Occurrence_Afternoon_Time<-c()
+Occurrence_Evening_Time<-c()
+Occurrence_Night_Time<-c()
+for (i in Occurrence_Time_Num){
+  if (6 <= i & i < 12){
+    Occurrence_Morning_Time <- rbind(Occurrence_Morning_Time, c(i))
+  }
+  if (12 <= i & i < 18){
+    Occurrence_Afternoon_Time <- rbind(Occurrence_Afternoon_Time, c(i))
+  }
+  if (18 <= i & i < 24){
+    Occurrence_Evening_Time <- rbind(Occurrence_Evening_Time, c(i))
+  }
+  if (0 <= i & i < 6){
+    Occurrence_Night_Time <- rbind(Occurrence_Night_Time, c(i))
+  }
+}
+
+```
+
+#Plot bicycle theft occurrence by time period.
+```{r}
+Occurrence_Period <- data.frame(time_period = c(1,2,3,4), period_occurrence = c(dim(Occurrence_Night_Time)[1], dim(Occurrence_Morning_Time)[1], dim(Occurrence_Afternoon_Time)[1], dim(Occurrence_Evening_Time)[1] ))
+Occurrence_Period
+occurrence_period <- ggplot(Occurrence_Period, aes(x=time_period, y=period_occurrence )) + 
+  geom_col(fill="#56B4E9", color = "#00AFBB") + 
+  scale_x_continuous(
+    name = "Occurrence Period", 
+    breaks =c(1,2,3,4), 
+    labels =  c("Night(0am-6am)", "Morning(6am-12pm)", "Afternoon(12pm-6pm)", "Evening(6pm-12am)")) + 
+  scale_y_continuous(name = "Number Reported")+labs(title = "Bike Theft Occurrence by Time Period", tag = "(4)") +theme_light()
+occurrence_period
+```
+
+#Plot bicycle theft occurrence by hour
+```{r}
+occurrence_time <- ggplot(data.frame(time = Occurrence_Time_Num), aes(x=time)) + 
+  geom_bar(fill="#56B4E9", color = "#00AFBB") + 
+  scale_x_continuous(
+    name = "Occurrence Time", 
+    breaks =c(0,2,4,6,8,10,12,14,16,18,20,22), 
+    labels =  c("0:00", "2:00",  "4:00", "6:00",  "8:00",  "10:00",  "12:00",  "14:00", "16:00",  "18:00", "20:00", "22:00")) + 
+  scale_y_continuous(name = "Number Reported")+ labs(title = "Bike Theft Occurrence by Hour", tag = "(5)") +theme_light()
+                     
+occurrence_time
+```
+
+#Create a new data frame containing the color of bikes stolen. Then remove the color of bikes that does not have enough cases reported.
+```{r}
+colour_count <- table(bike_theft_data$Bike_Colour)
+colour_count_table<-as.data.frame(colour_count)
+
+maj_color_reported<-data.frame(bike_colour=character(), colour_occur=numeric())
+
+for (i in 1:dim(colour_count_table)[1]){
+  if (colour_count_table$Freq[i] > 100){
+    maj_color_reported<-rbind(maj_color_reported,matrix(c(as.character(colour_count_table$Var1[i]), colour_count_table$Freq[i]) , ncol = 2, byrow = TRUE ) )
+  }
+}
+```
+
+#We proceed to include color with occurrence higher than 1000 from 2014-2019. 
+```{r}
+slices <- c(6212, 1960, 1691, sum(colour_count_table$Freq)-6212-1960-1691-1533-1798-1010
+, 1533, 1798, 1010)
+lbls<- c("Black", "Blue", "White", "Others","Red", "Grey", "Silver")
+pct <- round(slices/sum(slices)*100)
+lbls <- paste(lbls, pct) # add percents to labels 
+lbls <- paste(lbls,"%",sep="") # ad % to labels 
+colors = c("black", "skyblue1", "white", "wheat", "red", "grey46", "grey97")
+pie(slices, labels = lbls, main = "(8)-Percent of Occurrence by Color", col = colors)
+
+```
+
+
+This function gives us a clean data for cost of bikes stolen, omitting the "N/A" values.
+```{r}
+bike_cost<- data.frame(cost_of_bike=bike_theft_data$Cost_of_Bike)
+bike_cost<- na.omit(bike_cost)
+total_amt<- sum(as.numeric(as.character(bike_cost$cost_of_bike)))
+dim(bike_cost)
+```
+
+
+```{r}
+total_amt
+year_amt<-total_amt/6
+```
+
+Now we set variables for recovered stolen bikes in Toronto, and the cost of bikes recovered.
+```{r}
+recovered_bikes=0
+recovered_amt=0
+for (i in 1:dim(bike_theft_data)[1]){
+  if (as.character(bike_theft_data$Status[i]) == "RECOVERED"){
+    recovered_bikes<- recovered_bikes+1
+    if (!is.na(bike_theft_data$Cost_of_Bike[i])){
+      recovered_amt <- recovered_amt +as.numeric(as.character(bike_theft_data$Cost_of_Bike[i]))}
+  }
+}
+recovered_amt
+```
+
+#Graph the data in a pie chart to help us visualize the amount of recovered bikes in comparison to all bikes stolen.
+```{r}
+slices1<-c(recovered_amt, total_amt- recovered_amt )
+lbls1<-c("Stolen Cost \n Recovered \n $176,686.7 \n" , "Stolen Cost \n Unrecovered \n $18,627,893\n")
+pct1 <- round(slices1/sum(slices1)*100, 2)
+lbls1 <- paste(lbls1, pct1) # add percents to labels 
+lbls1 <- paste(lbls1,"%",sep="") # ad % to labels 
+pie(slices1 , labels = lbls1, main = "(6)Price of Stolen Bicycles \n 2014-2019", col = c("white", "skyblue1"))
+
+
+slices2<-c(recovered_bikes , dim(bike_theft_data)[1]- recovered_bikes)
+lbls2<-c("Stolen Bikes \n Recovered", "Stolen Bikes \n Unrecovered")
+pct2 <- round(slices2/sum(slices2)*100, 2)
+lbls2 <- paste(lbls2, pct2) # add percents to labels 
+lbls2 <- paste(lbls2,"%",sep="") # ad % to labels 
+pie(slices2, labels = lbls2, main = "(7)Recovered Stolen Bicycles \n 2014-2019", col = c("white", "skyblue1"))
+```
+
+
+#We then connect the recovery bikes to its color, to conclude the most recovered bikes color in Toronto. Similarly, we only included the color with more than 5 bikes recovered. To avoid lower frequency colors having 100% recovery rate.
+```{r}
+recov_colour<- data.frame(colour = character())
+for (i in 1:dim(bike_theft_data)[1]){
+  if (as.character(bike_theft_data$Status[i]) == "RECOVERED"){
+    recov_colour<- rbind(recov_colour, matrix(c(bike_theft_data$Bike_Colour[i])) )
+  }
+}
+recov_colour<- na.omit(recov_colour)
+sort(table(recov_colour$V1))
+
+col_slices<-c(60, 24, 23,22,15,12,8,5, dim(recov_colour)[1]-60-24-23-22-15-12-8-5)
+col_lbls<-c("Black", "Blue", "White", "Red", "Grey", "Silver","Green", "Purple", "Others")
+pie(col_slices, labels = col_lbls, main = "(9)Revovered Bicycles Color",col = c("black", "skyblue1", "white", "red", "grey46", "grey97", "palegreen","blueviolet","wheat"))
+```
+
+#Recovered bike ratio by colour
+```{r}
+bike_col_occ<-table(bike_theft_data$Bike_Colour)
+
+black_ratio<-60/bike_col_occ[names(bike_col_occ) == "BLK"]*100
+blue_ratio<-24/bike_col_occ[names(bike_col_occ) == "BLU"]*100
+white_ratio<-22/bike_col_occ[names(bike_col_occ) == "WHI"]*100
+grey_ratio<-15/bike_col_occ[names(bike_col_occ) == "GRY"]*100
+silver_ratio<-12/bike_col_occ[names(bike_col_occ) == "SIL"]*100
+green_ratio<-8/bike_col_occ[names(bike_col_occ) == "GRN"]*100
+purple_ratio<-5/bike_col_occ[names(bike_col_occ) == "PLE"]*100
+
+col_ratio<- data.frame(black_ratio, blue_ratio, white_ratio, grey_ratio, silver_ratio, green_ratio, purple_ratio)
+
+```
+
+
+#Separate neighborhood data by each year from 2014-2019. Then choose the top ten occurrence frequency neighborhood from each year and put them into separate tables.
+```{r}
+neighbourhood_2014<- data.frame(neighbourhood = character())
+neighbourhood_2015<- data.frame(neighbourhood = character())
+neighbourhood_2016<- data.frame(neighbourhood = character())
+neighbourhood_2017<- data.frame(neighbourhood = character())
+neighbourhood_2018<- data.frame(neighbourhood = character())
+neighbourhood_2019<- data.frame(neighbourhood = character())
+
+for (i in 1:dim(bike_theft_data)[1]){
+  if (bike_theft_data$Occurrence_Year[i] == 2014){
+    neighbourhood_2014<- rbind(neighbourhood_2014, matrix(c(as.character(bike_theft_data$Neighbourhood[i]))))}
+  if (bike_theft_data$Occurrence_Year[i] == 2015){
+    neighbourhood_2015<- rbind(neighbourhood_2015, matrix(c(as.character(bike_theft_data$Neighbourhood[i]))))}
+  if (bike_theft_data$Occurrence_Year[i] == 2016){
+    neighbourhood_2016<- rbind(neighbourhood_2016, matrix(c(as.character(bike_theft_data$Neighbourhood[i]))))}
+  if (bike_theft_data$Occurrence_Year[i] == 2017){
+    neighbourhood_2017<- rbind(neighbourhood_2017, matrix(c(as.character(bike_theft_data$Neighbourhood[i]))))}
+  if (bike_theft_data$Occurrence_Year[i] == 2018){
+    neighbourhood_2018<- rbind(neighbourhood_2018, matrix(c(as.character(bike_theft_data$Neighbourhood[i]))))}
+  if (bike_theft_data$Occurrence_Year[i] == 2019){
+    neighbourhood_2019<- rbind(neighbourhood_2019, matrix(c(as.character(bike_theft_data$Neighbourhood[i]))))}
+}
+
+top_occur_neib_2014<-tail(sort(table(neighbourhood_2014$V1)), 10)
+top_occur_neib_2015<-tail(sort(table(neighbourhood_2015$V1)), 10)
+top_occur_neib_2016<-tail(sort(table(neighbourhood_2016$V1)), 10)
+top_occur_neib_2017<-tail(sort(table(neighbourhood_2017$V1)), 10)
+top_occur_neib_2018<-tail(sort(table(neighbourhood_2018$V1)), 10)
+top_occur_neib_2019<-tail(sort(table(neighbourhood_2019$V1)), 10)
+
+```
+
+#Now we change those tables into data frames with descending order, the total occurrence each year is the dimension of the table above. So we can append other occurrence location as a whole to the data frame. Then proceed graphing.
+```{r}
+neib_2014_data<-as.data.frame(top_occur_neib_2014)
+neib_2014_data<-neib_2014_data[order(-neib_2014_data$Freq),]
+yr=c(2014,2014,2014,2014,2014,2014,2014,2014,2014, 2014)
+neib_2014_data<- cbind(neib_2014_data, yr)
+
+neib_2015_data<-as.data.frame(top_occur_neib_2015)
+neib_2015_data<-neib_2015_data[order(-neib_2015_data$Freq),]
+neib_2015_data<- cbind(neib_2015_data, yr=c(2015, 2015, 2015, 2015, 2015, 2015, 2015, 2015, 2015, 2015))
+
+neib_2016_data<-as.data.frame(top_occur_neib_2016)
+neib_2016_data<-neib_2016_data[order(-neib_2016_data$Freq),]
+neib_2016_data<- cbind(neib_2016_data, yr=c(2016,2016,2016,2016,2016,2016,2016,2016,2016,2016))
+
+neib_2017_data<-as.data.frame(top_occur_neib_2017)
+neib_2017_data<-neib_2017_data[order(-neib_2017_data$Freq),]
+neib_2017_data<- cbind(neib_2017_data, yr=c(2017, 2017, 2017, 2017, 2017, 2017, 2017, 2017,2017, 2017))
+
+neib_2018_data<-as.data.frame(top_occur_neib_2018)
+neib_2018_data<-neib_2018_data[order(-neib_2018_data$Freq),]
+neib_2018_data<- cbind(neib_2018_data, yr=c(2018, 2018,2018, 2018, 2018, 2018,2018, 2018,2018, 2018))
+
+neib_2019_data<-as.data.frame(top_occur_neib_2019)
+neib_2019_data<-neib_2019_data[order(-neib_2019_data$Freq),]
+neib_2019_data<- cbind(neib_2019_data, yr=c(2019,2019,2019,2019,2019,2019,2019,2019,2019,2019))
+
+
+```
+
+#The graph below includes high bike theft occurrence locations from 2014-2019. 
+```{r}
+neib_all<- rbind(neib_2014_data, neib_2015_data, neib_2016_data, neib_2017_data, neib_2018_data, neib_2019_data)
+
+neib_all_graph<-ggplot(neib_all, aes(x=Var1, y=Freq, fill=yr))+geom_col()+ scale_x_discrete( labels=c("Dovercourt-Wallace Emerson-Junction", "South Riverdale", "Kensington-Chinatown", "Niagara", "Annex", "Moss Park", "University", "Church-Yonge Corridor", "Waterfront Communities-The Island", "Bay Street", "Mimico"))+ scale_y_continuous(breaks = c(0,200,400,600,800,1000,1200,1400,1600,1800,2000, 2200,2400,2800, 3000) )  +labs(y="Number reported") +
+  theme(axis.text.x = element_text(face="bold", color="black", 
+                           size=8, angle=30)) + labs(title = "Major Bicycle Theft Threat Neighborhood 2014 - 2019", tag = "(10)") 
+neib_all_graph
+```

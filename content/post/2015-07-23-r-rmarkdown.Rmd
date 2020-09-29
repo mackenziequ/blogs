@@ -1,0 +1,120 @@
+---
+title: "Don't want your bike stolen? Paint it Green!"
+author: "Mackenzie Qu"
+date: 2020-09-27
+bibliography: "references.bib"
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression"]
+---
+## Abstract
+Bike theft has been an on-going issue in City of Toronto. In this paper we explore 2014-2019 bike theft data from Toronto Police Service. We find the trend for Toronto bike theft occurrence in regards of time, color of the bike, and location. Our findings have implications for preventing bike theft in Toronto for individuals, and the city as a whole.
+
+
+## Introduction
+Do you bike to places in Toronto? If so, then have you ever worried about coming out of a shop, only to find a single wheel left locked to the tree? I certainly do, because it has happened to me three months ago. My friend in food delivery service revealed that he had lost 4 bikes during two months of working, to a point that he didn't even bother to go to the police anymore. In this report, we investigate bike thefts in Toronto's correlation with time period, bike color, recovery rate, and location. Our findings are able to prevent bikers in Toronto from bike thefts.
+
+On average, more than 3 million dollars worth of bikes are getting stolen in Toronto every year, and only 1.17% of the stolen bikes are recovered. During a day, bike theft number peaks during rush hour and midnight. Also we have found that waterfront Communities - The Island is the most dangerous place to park you bikes. So next time when you have to park your bike there, make sure to double lock it! The most interesting findings in this report is the relation of bike colors and thefts. In general, common bike colors, such as black, gray, and white, are more likely to be stolen. On the other hand, bikes with bright colors are more likely to be recovered by the police. 
+
+In summary, this report demonstrates the pattern of bike theft in the past six years. With more information such as population distribution, average income distribution, bike color distribution, we could potentially understand the reason behind bike theft trends in Toronto with a more accurate conclusion. This report could be further improved by using more variables from the data set given, and combining with its findings. For example, occurrence location with each neighborhood, or police division with recovered bikes. However, bike theft problem is more complex than the variables we used, and we cannot firmly conclude that it has a correlation to the variables without further information. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+#install.packages("opendatatoronto")
+library(ggplot2)
+```
+## Bike Theft Data
+### It is improving!!
+The graph ((1)-"Bike Theft Occurrence by Year") visualizes the trend of bike theft occurrence from 2014 - 2019.
+
+![](/post/2015-07-23-r-rmarkdown_files/Rplot02.png)
+
+We can see a growing trend from 2014 to 2018. But 2019 broke the ascending trend. It is shown as the third lowest in 6 years. With the constant growing population of Toronto, this graph has shown positive result of public acknowledgment of bike theft prevention, and safety measures. So whatever we are doing to prevent bike theft, we are doing it right!
+ 
+### Your Bike can be stolen in winter too
+
+From the graph((2)-"Bike Theft Occurrence by Month"), we've seen a predicable trend of significantly more bike theft from May to October as the weather allows more people to use their bikes.   
+
+![](/post/2015-07-23-r-rmarkdown_files/Rplot01.png)
+
+However, the bike thefts occurred in winter is higher than expectation where approximately 800 bikes get stolen during the winter. It is quite hard to imagine people biking in Toronto during the winter with three feet of snow, though some still might (just why???). It is more likely that winter bike thefts happen due to bikes parked at an insecure location for a long period of time. 
+
+In future studies we could connect winter theft occurrence to the premise type when the crime occurred to find which premise type is at a higher risk for a long term parking. If possible, park your bikes inside!(Or hide it well)
+
+### Which days are more dangerous for your bike?
+
+The relation of bike thefts and day in a month is relatively stable. However there is a slight peak on the first day of a month and in the middle of a month. 
+
+![](/post/2015-07-23-r-rmarkdown_files/Rplot03.png)
+
+The 15th of a month has the highest risk of bike theft, and the 31st of a month is relatively the safest. (doesn't mean you don't have to lock your bike on the 31st!)
+
+Note: The data on the 31st should be manipulated by multiplying 12/7. We got the value of 490.28 bikes revealing the more accurate counts. However it is still has the lowest bike theft rate.
+
+### Commute to work? Be extra careful during rush hour 
+
+The following graphs shows the bike theft counts and the corresponding time-period/hour. It is shown that more bike thieves are more active in the afternoon and evening((4)-"Bike Theft Occurrence by Time Period").
+![](/post/2015-07-23-r-rmarkdown_files/Rplot04.png)![](/post/2015-07-23-r-rmarkdown_files/Rplot05.png)
+
+When we look at the specific hour when bike thefts occur((5)-"Bike Theft Occurrence by Hour"), the peaks are at 8/9 am, 12pm, and 5/6pm. It is during the rush hour thus more people are using/locking their bikes, thus makes breaking bike lock less noticeable. During the night and early morning, less bikes are stolen. But we do see a peak during that time at 12:00am. 
+
+Note: In the data set given, it is described to be time of occurrence. But realistically it would be either time when stolen bikes are reported by owner, or estimate time. Results might vary.
+
+### "My bike was stolen, will I ever find it?"
+
+Unfortunately, you likely won't ever see your bike again. Even if you do, you probably won't be its owner anymore. 
+In the past 6 years, bike thieves has cost people in Toronto $18,804,580, and only $176,686.7 dollars worth of bikes are recovered. Graph ((6)-"Price of Stolen Bicycles") below helps us visualize it. 
+
+![](/post/2015-07-23-r-rmarkdown_files/000029.png)
+
+Graph((7)-"Recovered Stolen Bicycles") shows us the percentage of bikes recovered among the 21584 bikes stolen from 2014-2017. In future studies we will compare the recovery rate for each year and see if there is an improvement. 
+
+![](/post/2015-07-23-r-rmarkdown_files/00002b.png)
+
+
+### Green Bikes? It might be ugly but it works
+
+The pie chart ((8)- "Percentage of Occurrence by Color) shows the percentage as a comparison of highest occurrence colors. 
+
+![](/post/2015-07-23-r-rmarkdown_files/000017.png)
+
+From the colors shown, it is obvious that the highest occurrence colors are the most popular colors due to a higher population of common color bikes. We could confirm the theory if we had a data set on the population of each colored bikes in Toronto, then compare each color's ratio. 
+
+In addition, there are some alternative reasons behind such occurrence. In one of BenVollard's(Associate Professor, Department of Economics, University of Tilburg) paper, he argues that bike and auto thefts are driven by economics, and having a bright colored bike could potentially prevent theft. To elaborate, bright colored bikes are less popular among buyers, thus are less in demand in comparison to, for example, black or gray bikes. Therefore the resale price would be lower. So stealing bright colored bikes not only have more risks as they are easier to be spotted, but also hold lower resale value. So the theft occurrence of less common colored bikes would be expected to have a large difference compare to the more common ones. 
+
+![](/post/2015-07-23-r-rmarkdown_files/000009.png)
+
+We have also combined color with the recovery rate for stolen bikes. From graph ((9)-"Recovered Bicycles "), we compare each high theft occurrence color's recovery rate. The recovery rates from the highest to the lowest and its corresponding color are listed below.
+
+Green: 1.36%, White: 1.30%, Purple: 1.26%, Blue: 1.22%, Silver: 1.19%, Black: 0.97%, Grey: 0.83%
+
+Compare to the recovery rate of all bicycles, 1.17%, we can conclude that Green, White, Purple, and blue colored bikes have the highest recovery rate. Green and purple are not on the list of high occurrence colors, but they have comparatively higher recovery rate. We can conclude that Green and Purple are safest colors. So if you are getting tired of getting your bikes stolen, paint it green or purple!
+
+### If your neighborhood is on the graph below, think twice before you park on the street
+
+Bike theft, in terms of neighborhood is graphed below((10)-"Major Bicycle Theft Threat Neighborhood 2014-2019"). From the graph we see the top three neighborhood of bike theft: Church-Yonge Corridor, Waterfront Communities-The Island, and Bay Street has been top three through out the 6 years.
+
+![](/post/2015-07-23-r-rmarkdown_files/Rplot08.png)
+
+Meanwhile, Minico became one of the bike theft hotpot in 2018 and 2019. Mainly due to the extension of Toronto and new infrastructures built in Mimico. In addition, a new Go Train station in Mimico was added in Jun 2018 with more bus routes, leading to a drastic increase to the population of Mimico as it has become more convenient. We have drown a connection of bike theft occurrence to neighborhood population, but there is no avaliable data to back this up, so we cannot firmly conclude such causation.
+South Riverdale's bike theft occurrence showed a growing trend until 2018. Then in 2019, it was no longer the top 10 occurrence neighborhood. And Dovercourt-Wallace Emerson-Junction was removed from top bike theft neighborhood in 2019. However, these changes are due to the increase of bike theft occurrence in Mimico, and we do not expect them have a drastic decrease.
+
+### Summary
+
+The data above gives us an idea of how to prevent bike theft from the patterns shown. However, the best way to prevent bike theft is ourselves. Securely lock our bikes, write down the serial number, store bikes inside are the best method to actively keep our bikes safe from thieves. To all the bikers: Be safe out there!!
+
+
+## Citations
+1. R Core Team (2019). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
+2. Hadley Wickham, Jim Hester and Winston Chang (2020). devtools: Tools to Make Developing R Packages Easier. R package version 2.3.2. https://CRAN.R-project.org/package=devtools
+3. Hadley Wickham, Romain François, Lionel Henry and Kirill Müller (2020). dplyr: A Grammar of Data Manipulation. R package version 1.0.2. https://CRAN.R-project.org/package=dplyr
+4. Sharla Gelfand (2020). opendatatoronto: Access the City of Toronto Open Data Portal. https://sharlagelfand.github.io/opendatatoronto/, https://github.com/sharlagelfand/opendatatoronto/.
+5. H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
+6. Wickham et al., (2019). Welcome to the tidyverse. Journal of Open Source Software, 4(43), 1686, https://doi.org/10.21105/joss.01686
+7. JJ Allaire and Yihui Xie and Jonathan McPherson and Javier Luraschi and Kevin Ushey and Aron Atkins and Hadley Wickham and Joe Cheng and Winston Chang and Richard Iannone (2020). rmarkdown: Dynamic Documents for R. R package version 2.3.9. URL https://rmarkdown.rstudio.com.
+8. Yihui Xie and J.J. Allaire and Garrett Grolemund (2018). R Markdown: The Definitive Guide. Chapman and Hall/CRC. ISBN 9781138359338. URL https://bookdown.org/yihui/rmarkdown.
+9.Yihui Xie and Christophe Dervieux and Emily Riederer (2020). R Markdown Cookbook. Chapman and Hall/CRC. ISBN 9780367563837. URL https://bookdown.org/yihui/rmarkdown-cookbook.
+10. Gotransit.com. 2020. Mimico GO | Construction Projects | GO Transit. [online] Available at: <https://www.gotransit.com/en/the-future-go/improvements/mimico>.
+11. Toronto Sun. 2020. Mimico Is The New Go-To Community. [online] Available at: <https://torontosun.com/life/homes/mimico-is-the-new-go-to-community>.
+12. Vollaard, B., 2020. Car Thieves: Not Too Bright, Please! | VOX, CEPR Policy Portal. [online] Voxeu.org. Available at: <https://voxeu.org/article/car-thieves-not-too-bright-please>.
+
+
